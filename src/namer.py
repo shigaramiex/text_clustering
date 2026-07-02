@@ -14,10 +14,18 @@ def sanitize_folder_name(name: str) -> str:
 def assign_cluster_names(
     token_lists: list[list[str]], labels: np.ndarray
 ) -> dict[int, str]:
-    """Pick the top mean-TF-IDF noun per cluster as its representative name.
+    """Pick a representative noun per cluster from words that stand out in
+    that cluster relative to the others.
 
-    Colliding names (two clusters sharing the same top noun) are
-    disambiguated with a numeric suffix.
+    Using the plain top mean-TF-IDF term tends to pick words that are
+    common across the whole genre (e.g. "映画" for every cluster inside a
+    movie-news folder), which makes cluster names indistinguishable. This
+    instead scores each term by (mean TF-IDF inside the cluster) minus
+    (mean TF-IDF outside the cluster), so a term shared by every cluster
+    scores near zero and loses to a term unique to one cluster.
+
+    Colliding names (e.g. a genuine tie) are disambiguated with a numeric
+    suffix.
     """
     vectorizer = TfidfVectorizer(
         tokenizer=lambda tokens: tokens,
@@ -25,16 +33,25 @@ def assign_cluster_names(
         token_pattern=None,
         lowercase=False,
     )
-    tfidf = vectorizer.fit_transform(token_lists)
+    tfidf = vectorizer.fit_transform(token_lists).toarray()
     terms = vectorizer.get_feature_names_out()
     labels = np.asarray(labels)
 
     names: dict[int, str] = {}
     used_names: dict[str, int] = {}
     for label in sorted(set(labels)):
-        mask = labels == label
-        mean_scores = np.asarray(tfidf[mask].mean(axis=0)).ravel()
-        top_term = sanitize_folder_name(terms[mean_scores.argmax()])
+        in_cluster = labels == label
+        out_cluster = ~in_cluster
+
+        in_cluster_mean = tfidf[in_cluster].mean(axis=0)
+        out_cluster_mean = (
+            tfidf[out_cluster].mean(axis=0)
+            if out_cluster.any()
+            else np.zeros_like(in_cluster_mean)
+        )
+        distinctiveness = in_cluster_mean - out_cluster_mean
+
+        top_term = sanitize_folder_name(terms[distinctiveness.argmax()])
 
         count = used_names.get(top_term, 0) + 1
         used_names[top_term] = count
