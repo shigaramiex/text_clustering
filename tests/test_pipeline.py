@@ -62,7 +62,7 @@ def _write_article(path, title, body):
     )
 
 
-def test_process_genre_folder_moves_files_into_two_named_clusters(tmp_path):
+def test_process_genre_folder_copies_files_into_two_named_clusters(tmp_path):
     genre_dir = tmp_path / "dokujo-tsushin"
     genre_dir.mkdir()
     _write_article(genre_dir / "a.txt", "猫の記事", "猫と犬について猫は可愛い")
@@ -78,12 +78,15 @@ def test_process_genre_folder_moves_files_into_two_named_clusters(tmp_path):
         cluster_fn=_fake_cluster_fn,
     )
 
-    subfolders = {p.name for p in genre_dir.iterdir() if p.is_dir()}
+    output_dir = tmp_path / "dokujo-tsushin_clustered"
+    subfolders = {p.name for p in output_dir.iterdir() if p.is_dir()}
     assert len(subfolders) == 2
     assert summary["total_files"] == 4
     assert summary["num_clusters"] == 2
-    # original files no longer sit directly under genre_dir
-    assert not (genre_dir / "a.txt").exists()
+    assert summary["output_dir"] == output_dir
+    # the original folder and its files are completely untouched
+    assert (genre_dir / "a.txt").exists()
+    assert {p.name for p in genre_dir.iterdir()} == {"a.txt", "b.txt", "c.txt", "d.txt"}
 
 
 def test_process_genre_folder_skips_when_fewer_than_two_files(tmp_path):

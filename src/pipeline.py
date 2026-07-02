@@ -3,7 +3,7 @@ from typing import Callable
 
 from src.clusterer import cluster_documents
 from src.embedder import embed_texts
-from src.file_organizer import organize_files
+from src.file_organizer import copy_files_into_clusters, output_dir_for
 from src.namer import assign_cluster_names
 from src.text_normalizer import normalize_text
 from src.tokenizer import extract_nouns
@@ -35,8 +35,9 @@ def process_genre_folder(
     cluster_fn: Callable = cluster_documents,
     progress_callback: Callable[[str], None] | None = None,
 ) -> dict:
-    """Sub-cluster the articles inside one genre folder and move each file
-    into a subfolder named after its cluster's representative noun.
+    """Sub-cluster the articles inside one genre folder and copy each file
+    into a subfolder (named after its cluster's representative noun) of a
+    new sibling output folder. The original folder is never modified.
     """
     genre_dir = Path(genre_dir)
 
@@ -49,7 +50,7 @@ def process_genre_folder(
 
     if len(file_paths) < 2:
         report(f"{genre_dir.name}: クラスタリングに十分なファイル数がないためスキップします")
-        return {"total_files": len(file_paths), "num_clusters": 0}
+        return {"total_files": len(file_paths), "num_clusters": 0, "output_dir": None}
 
     report(f"{genre_dir.name}: 前処理・形態素解析を実行中...")
     token_lists = [prepare_document(path) for path in file_paths]
@@ -64,8 +65,16 @@ def process_genre_folder(
     names_by_label = assign_cluster_names(token_lists, labels)
     cluster_names = [names_by_label[label] for label in labels]
 
-    report(f"{genre_dir.name}: {len(names_by_label)}個のクラスタにファイルを振り分け中...")
-    organize_files(genre_dir, file_paths, cluster_names)
+    output_dir = output_dir_for(genre_dir)
+    report(
+        f"{genre_dir.name}: {len(names_by_label)}個のクラスタに分けて"
+        f"{output_dir.name} へコピー中..."
+    )
+    copy_files_into_clusters(output_dir, file_paths, cluster_names)
 
-    report(f"{genre_dir.name}: 完了 ({len(names_by_label)}クラスタ)")
-    return {"total_files": len(file_paths), "num_clusters": len(names_by_label)}
+    report(f"{genre_dir.name}: 完了 ({len(names_by_label)}クラスタ, 出力先: {output_dir})")
+    return {
+        "total_files": len(file_paths),
+        "num_clusters": len(names_by_label),
+        "output_dir": output_dir,
+    }

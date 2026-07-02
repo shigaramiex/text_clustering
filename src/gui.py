@@ -96,10 +96,18 @@ class ClusteringApp:
                 k_max=self.k_max.get(),
                 progress_callback=self._message_queue.put,
             )
-            self._message_queue.put(
-                f"完了: {summary['total_files']}件のファイルを"
-                f"{summary['num_clusters']}個のクラスタに振り分けました"
-            )
+            if summary["output_dir"] is not None:
+                self._message_queue.put(
+                    f"完了: {summary['total_files']}件のファイルを"
+                    f"{summary['num_clusters']}個のクラスタに分類し、"
+                    f"{summary['output_dir']} にコピーしました"
+                    "（元のフォルダは変更していません）"
+                )
+            else:
+                self._message_queue.put(
+                    f"完了: ファイルが{summary['total_files']}件のみのため"
+                    "クラスタリングをスキップしました"
+                )
         except Exception as exc:  # noqa: BLE001 - surface to the log panel
             self._message_queue.put(f"予期しないエラー: {exc}")
         finally:

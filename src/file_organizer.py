@@ -1,23 +1,31 @@
 import shutil
 from pathlib import Path
 
+OUTPUT_DIR_SUFFIX = "_clustered"
 
-def organize_files(
-    genre_dir: Path, file_paths: list[Path], cluster_names: list[str]
+
+def output_dir_for(source_dir: Path) -> Path:
+    """Sibling output folder for source_dir's clustering results."""
+    source_dir = Path(source_dir)
+    return source_dir.parent / f"{source_dir.name}{OUTPUT_DIR_SUFFIX}"
+
+
+def copy_files_into_clusters(
+    output_dir: Path, file_paths: list[Path], cluster_names: list[str]
 ) -> dict[Path, Path]:
-    """Move each file into a subfolder of genre_dir named after its cluster.
+    """Copy each file into a cluster subfolder under output_dir.
 
-    Files are moved as-is (shutil.move preserves bytes); their content is
-    never read or rewritten by this function.
+    The source files are only ever read, never moved or rewritten, so the
+    original folder is left completely untouched.
     """
-    genre_dir = Path(genre_dir)
-    moved: dict[Path, Path] = {}
+    output_dir = Path(output_dir)
+    copied: dict[Path, Path] = {}
 
     for file_path, cluster_name in zip(file_paths, cluster_names):
-        cluster_dir = genre_dir / cluster_name
+        cluster_dir = output_dir / cluster_name
         cluster_dir.mkdir(parents=True, exist_ok=True)
         destination = cluster_dir / file_path.name
-        shutil.move(str(file_path), str(destination))
-        moved[file_path] = destination
+        shutil.copy2(str(file_path), str(destination))
+        copied[file_path] = destination
 
-    return moved
+    return copied
