@@ -1,0 +1,7 @@
+sudachipy>=0.6.8
+sudachidict_core>=20240716
+jaconv>=0.4.0
+scikit-learn>=1.5.0
+sentence-transformers>=3.0.0
+numpy>=1.26.0
+pytest>=8.0.0
