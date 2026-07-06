@@ -1,6 +1,22 @@
+import inspect
+
 import numpy as np
 
-from src.clusterer import cluster_documents, choose_best_k
+from src.clusterer import DEFAULT_K_MAX, DEFAULT_K_MIN, cluster_documents, choose_best_k
+
+
+def test_choose_best_k_defaults_match_the_shared_constants():
+    # Guards against the two functions in this module silently drifting
+    # apart (they once had different k_min/k_max defaults from each other).
+    params = inspect.signature(choose_best_k).parameters
+    assert params["k_min"].default == DEFAULT_K_MIN
+    assert params["k_max"].default == DEFAULT_K_MAX
+
+
+def test_cluster_documents_defaults_match_the_shared_constants():
+    params = inspect.signature(cluster_documents).parameters
+    assert params["k_min"].default == DEFAULT_K_MIN
+    assert params["k_max"].default == DEFAULT_K_MAX
 
 
 def _two_separated_blobs():

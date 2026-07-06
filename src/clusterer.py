@@ -2,9 +2,18 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
+# クラスタ数関連の唯一の情報源（single source of truth）。
+# pipeline.py・gui.pyはここから値を参照し、各自でハードコードしない。
+DEFAULT_K_MIN = 20
+DEFAULT_K_MAX = 30
+DEFAULT_FIXED_K = 20
+
 
 def choose_best_k(
-    vectors: np.ndarray, k_min: int = 2, k_max: int = 10, random_state: int = 42
+    vectors: np.ndarray,
+    k_min: int = DEFAULT_K_MIN,
+    k_max: int = DEFAULT_K_MAX,
+    random_state: int = 42,
 ) -> int:
     """[k_min, k_max]の範囲でシルエットスコアが最も高いkを選ぶ。"""
     n_samples = len(vectors)
@@ -27,8 +36,8 @@ def choose_best_k(
 
 def cluster_documents(
     vectors: np.ndarray,
-    k_min: int = 2,
-    k_max: int = 5,
+    k_min: int = DEFAULT_K_MIN,
+    k_max: int = DEFAULT_K_MAX,
     random_state: int = 42,
     fixed_k: int | None = None,
 ) -> np.ndarray:

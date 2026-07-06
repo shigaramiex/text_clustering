@@ -1,10 +1,12 @@
 from pathlib import Path
 from typing import Callable
 
-from src.clusterer import cluster_documents
+from src.clusterer import DEFAULT_K_MAX, DEFAULT_K_MIN, cluster_documents
 from src.embedder import embed_texts
 from src.file_organizer import copy_files_into_clusters, output_dir_for
 from src.labeler import (
+    DEFAULT_TOP_N_KEYWORDS,
+    DEFAULT_TOP_N_REPRESENTATIVES,
     compute_ctfidf_keywords,
     compute_document_frequency_ratios,
     find_representative_titles,
@@ -45,12 +47,12 @@ def prepare_document(path: Path) -> list[str]:
 
 def process_genre_folder(
     genre_dir: Path,
-    k_min: int = 20,
-    k_max: int = 30,
+    k_min: int = DEFAULT_K_MIN,
+    k_max: int = DEFAULT_K_MAX,
     random_state: int = 42,
     fixed_k: int | None = None,
-    top_n_keywords: int = 20,
-    top_n_representatives: int = 3,
+    top_n_keywords: int = DEFAULT_TOP_N_KEYWORDS,
+    top_n_representatives: int = DEFAULT_TOP_N_REPRESENTATIVES,
     embed_fn: Callable = embed_texts,
     cluster_fn: Callable = cluster_documents,
     keyword_fn: Callable = compute_ctfidf_keywords,

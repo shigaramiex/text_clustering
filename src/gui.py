@@ -4,6 +4,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
+from src.clusterer import DEFAULT_FIXED_K, DEFAULT_K_MAX, DEFAULT_K_MIN
 from src.pipeline import process_genre_folder
 
 
@@ -15,9 +16,9 @@ class ClusteringApp:
 
         self.selected_dir = tk.StringVar()
         self.k_mode = tk.StringVar(value="auto")
-        self.k_min = tk.IntVar(value=2)
-        self.k_max = tk.IntVar(value=10)
-        self.fixed_k = tk.IntVar(value=5)
+        self.k_min = tk.IntVar(value=DEFAULT_K_MIN)
+        self.k_max = tk.IntVar(value=DEFAULT_K_MAX)
+        self.fixed_k = tk.IntVar(value=DEFAULT_FIXED_K)
         self._message_queue: queue.Queue[str] = queue.Queue()
         self._worker_thread: threading.Thread | None = None
 
@@ -48,7 +49,7 @@ class ClusteringApp:
             value="auto",
         ).pack(side=tk.LEFT)
         ttk.Spinbox(
-            param_frame, from_=2, to=20, textvariable=self.k_min, width=5
+            param_frame, from_=2, to=30, textvariable=self.k_min, width=5
         ).pack(side=tk.LEFT, padx=5)
         ttk.Label(param_frame, text="〜").pack(side=tk.LEFT)
         ttk.Spinbox(

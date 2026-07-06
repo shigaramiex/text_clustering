@@ -1,11 +1,25 @@
+import inspect
+
 import numpy as np
 
+from src.clusterer import DEFAULT_K_MAX, DEFAULT_K_MIN
+from src.labeler import DEFAULT_TOP_N_KEYWORDS, DEFAULT_TOP_N_REPRESENTATIVES
 from src.pipeline import (
     prepare_document,
     process_genre_folder,
     read_article_text,
     read_article_title,
 )
+
+
+def test_process_genre_folder_defaults_match_the_shared_constants():
+    # Guards against pipeline.py's parameter defaults silently drifting
+    # away from clusterer.py's / labeler.py's single source of truth.
+    params = inspect.signature(process_genre_folder).parameters
+    assert params["k_min"].default == DEFAULT_K_MIN
+    assert params["k_max"].default == DEFAULT_K_MAX
+    assert params["top_n_keywords"].default == DEFAULT_TOP_N_KEYWORDS
+    assert params["top_n_representatives"].default == DEFAULT_TOP_N_REPRESENTATIVES
 
 
 SAMPLE_ARTICLE = (
