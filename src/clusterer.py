@@ -6,7 +6,7 @@ from sklearn.metrics import silhouette_score
 def choose_best_k(
     vectors: np.ndarray, k_min: int = 2, k_max: int = 10, random_state: int = 42
 ) -> int:
-    """Pick the k in [k_min, k_max] with the highest silhouette score."""
+    """[k_min, k_max]の範囲でシルエットスコアが最も高いkを選ぶ。"""
     n_samples = len(vectors)
     effective_k_max = min(k_max, n_samples - 1)
     if effective_k_max < k_min:
@@ -26,14 +26,27 @@ def choose_best_k(
 
 
 def cluster_documents(
-    vectors: np.ndarray, k_min: int = 2, k_max: int = 10, random_state: int = 42
+    vectors: np.ndarray,
+    k_min: int = 2,
+    k_max: int = 5,
+    random_state: int = 42,
+    fixed_k: int | None = None,
 ) -> np.ndarray:
-    """Cluster document vectors, automatically choosing k via silhouette score."""
+    """文書ベクトルをクラスタリングする。
+
+    fixed_kが指定された場合は、そのクラスタ数（サンプル数でクランプ）を
+    自動選択せずそのまま使用する。指定がなければ[k_min, k_max]の範囲で
+    シルエットスコアによりkを自動的に選ぶ。
+    """
     n_samples = len(vectors)
     if n_samples < 2:
         return np.zeros(n_samples, dtype=int)
 
-    k = choose_best_k(vectors, k_min=k_min, k_max=k_max, random_state=random_state)
+    if fixed_k is not None:
+        k = min(fixed_k, n_samples)
+    else:
+        k = choose_best_k(vectors, k_min=k_min, k_max=k_max, random_state=random_state)
+
     if k <= 1:
         return np.zeros(n_samples, dtype=int)
 

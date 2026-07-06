@@ -14,8 +14,10 @@ class ClusteringApp:
         self.root.geometry("640x480")
 
         self.selected_dir = tk.StringVar()
+        self.k_mode = tk.StringVar(value="auto")
         self.k_min = tk.IntVar(value=2)
         self.k_max = tk.IntVar(value=10)
+        self.fixed_k = tk.IntVar(value=5)
         self._message_queue: queue.Queue[str] = queue.Queue()
         self._worker_thread: threading.Thread | None = None
 
@@ -39,13 +41,31 @@ class ClusteringApp:
         param_frame = ttk.Frame(self.root, padding=10)
         param_frame.pack(fill=tk.X)
 
-        ttk.Label(param_frame, text="クラスタ数探索範囲 k =").pack(side=tk.LEFT)
+        ttk.Radiobutton(
+            param_frame,
+            text="自動決定 (シルエットスコア) k =",
+            variable=self.k_mode,
+            value="auto",
+        ).pack(side=tk.LEFT)
         ttk.Spinbox(
             param_frame, from_=2, to=20, textvariable=self.k_min, width=5
         ).pack(side=tk.LEFT, padx=5)
         ttk.Label(param_frame, text="〜").pack(side=tk.LEFT)
         ttk.Spinbox(
             param_frame, from_=2, to=30, textvariable=self.k_max, width=5
+        ).pack(side=tk.LEFT, padx=5)
+
+        fixed_k_frame = ttk.Frame(self.root, padding=(10, 0, 10, 10))
+        fixed_k_frame.pack(fill=tk.X)
+
+        ttk.Radiobutton(
+            fixed_k_frame,
+            text="固定値 k =",
+            variable=self.k_mode,
+            value="fixed",
+        ).pack(side=tk.LEFT)
+        ttk.Spinbox(
+            fixed_k_frame, from_=1, to=50, textvariable=self.fixed_k, width=5
         ).pack(side=tk.LEFT, padx=5)
 
         self.run_button = ttk.Button(
@@ -90,10 +110,12 @@ class ClusteringApp:
 
     def _run_pipeline(self, target_dir: str) -> None:
         try:
+            fixed_k = self.fixed_k.get() if self.k_mode.get() == "fixed" else None
             summary = process_genre_folder(
                 Path(target_dir),
                 k_min=self.k_min.get(),
                 k_max=self.k_max.get(),
+                fixed_k=fixed_k,
                 progress_callback=self._message_queue.put,
             )
             if summary["output_dir"] is not None:
@@ -103,12 +125,18 @@ class ClusteringApp:
                     f"{summary['output_dir']} にコピーしました"
                     "（元のフォルダは変更していません）"
                 )
+                for name, keywords in summary["keywords"].items():
+                    titles = summary["representative_titles"].get(name, [])
+                    self._message_queue.put(
+                        f"  ・{name}: キーワード[{', '.join(keywords)}] "
+                        f"代表記事[{' / '.join(titles)}]"
+                    )
             else:
                 self._message_queue.put(
                     f"完了: ファイルが{summary['total_files']}件のみのため"
                     "クラスタリングをスキップしました"
                 )
-        except Exception as exc:  # noqa: BLE001 - surface to the log panel
+        except Exception as exc:  # noqa: BLE001 - ログパネルに表示するため捕捉
             self._message_queue.put(f"予期しないエラー: {exc}")
         finally:
             self._message_queue.put("__DONE__")

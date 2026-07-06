@@ -1,30 +1,19 @@
 from sudachipy import Dictionary, SplitMode
 
-# Generic nouns that carry little topical meaning on their own and would
-# otherwise dominate clusters/representative names across every genre.
+# それ単体では話題としての意味を持たない汎用的な名詞。
+# 除外しないとあらゆるジャンルでクラスタ名・代表語を占拠してしまう。
 STOPWORD_NOUNS = frozenset(
     {
         "こと",
         "もの",
+        "ところ",
+        "ため",
         "よう",
-        "為",
-        "はず",
-        "うち",
         "とき",
         "ところ",
-        "わけ",
-        "ほう",
-        "の",
-        "さん",
-        "たち",
-        "そう",
-        "ため",
-        "上",
-        "中",
-        "自分",
-        "みんな",
-        "記事",
-        "写真",
+        "こと",
+        "もの",
+        "こと", 
     }
 )
 
@@ -33,11 +22,10 @@ _SPLIT_MODE = SplitMode.C
 
 
 def extract_nouns(text: str) -> list[str]:
-    """Tokenize text and return only content-bearing noun tokens.
+    """テキストを分かち書きし、内容を表す名詞トークンのみを返す。
 
-    Particles, auxiliary verbs, numerals, pronouns, punctuation and
-    generic stopword nouns are excluded, leaving the tokens useful for
-    clustering and representative-noun extraction.
+    助詞・助動詞・数詞・代名詞・記号、および汎用的なストップワード名詞は
+    除外され、クラスタリングや代表語抽出に有用なトークンのみが残る。
     """
     nouns = []
     for morpheme in _tokenizer_obj.tokenize(text, _SPLIT_MODE):

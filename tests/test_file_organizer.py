@@ -70,7 +70,7 @@ def test_copied_file_content_is_byte_for_byte_unchanged(tmp_path):
     copied_path = result[file_a]
     assert _sha256(copied_path) == original_hash
     assert copied_path.read_bytes() == original_bytes
-    # source is untouched too
+    # 元ファイルも変更されていないこと
     assert _sha256(file_a) == original_hash
 
 

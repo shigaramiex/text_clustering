@@ -18,9 +18,8 @@ _ZEN_TO_HAN_TABLE = str.maketrans(_ZENKAKU_ALNUM, _HANKAKU_ALNUM)
 
 
 def normalize_text(text: str) -> str:
-    """Convert ASCII letters/digits to half-width and kana to
-    full-width, then strip all whitespace. Punctuation/symbol width is
-    left untouched. Operates purely in memory.
+    """英数字は半角に、かなは全角に変換し、その後すべての空白を除去する。
+    記号・句読点の全角/半角は変更しない。処理はメモリ上でのみ行う。
     """
     text = jaconv.h2z(text, kana=True, ascii=False, digit=False)
     text = text.translate(_ZEN_TO_HAN_TABLE)

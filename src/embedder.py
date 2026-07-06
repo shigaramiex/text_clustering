@@ -14,7 +14,7 @@ def _get_model() -> SentenceTransformer:
 
 
 def embed_texts(texts: list[str]) -> np.ndarray:
-    """Encode texts into L2-normalized dense vectors for clustering."""
+    """テキストをクラスタリング用にL2正規化された密ベクトルへ変換する。"""
     if not texts:
         return np.empty((0, 0), dtype=np.float32)
     prefixed = [f"query: {text}" for text in texts]

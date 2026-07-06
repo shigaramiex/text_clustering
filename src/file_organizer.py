@@ -5,7 +5,7 @@ OUTPUT_DIR_SUFFIX = "_clustered"
 
 
 def output_dir_for(source_dir: Path) -> Path:
-    """Sibling output folder for source_dir's clustering results."""
+    """source_dirのクラスタリング結果を出力する、同階層の出力フォルダ。"""
     source_dir = Path(source_dir)
     return source_dir.parent / f"{source_dir.name}{OUTPUT_DIR_SUFFIX}"
 
@@ -13,10 +13,10 @@ def output_dir_for(source_dir: Path) -> Path:
 def copy_files_into_clusters(
     output_dir: Path, file_paths: list[Path], cluster_names: list[str]
 ) -> dict[Path, Path]:
-    """Copy each file into a cluster subfolder under output_dir.
+    """各ファイルをoutput_dir配下のクラスタサブフォルダへコピーする。
 
-    The source files are only ever read, never moved or rewritten, so the
-    original folder is left completely untouched.
+    元ファイルは読み込むだけで、移動や書き換えは一切行わないため、
+    元のフォルダは完全に変更されずそのまま残る。
     """
     output_dir = Path(output_dir)
     copied: dict[Path, Path] = {}

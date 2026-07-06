@@ -30,8 +30,8 @@ def test_newlines_and_tabs_removed():
 
 
 def test_mixed_text_end_to_end():
-    # Full-width punctuation/symbols (（）？＆) are neither Japanese kana/kanji
-    # nor alphanumeric, so their width is left untouched by design.
+    # 全角の記号・句読点（（）？＆）は日本語のかな・漢字でも英数字でも
+    # ないため、意図的に幅を変換しない。
     raw = "友人代表のスピーチ、独女（３３歳）はどうこなしている？　Ａｉ＆ｕｅｏ　１２３"
     expected = "友人代表のスピーチ、独女（33歳）はどうこなしている？Ai＆ueo123"
     assert normalize_text(raw) == expected

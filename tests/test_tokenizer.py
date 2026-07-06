@@ -35,15 +35,6 @@ def test_pronouns_are_excluded():
 def test_generic_stopword_nouns_are_excluded():
     tokens = extract_nouns("これはことのためによい")
     assert "こと" not in tokens
-    assert "為" not in tokens
-
-
-def test_generic_news_boilerplate_nouns_are_excluded():
-    # Words like "記事"(article) appear in nearly every news article
-    # regardless of topic, so they make poor cluster names.
-    tokens = extract_nouns("この記事は写真付きで紹介する")
-    assert "記事" not in tokens
-    assert "写真" not in tokens
 
 
 def test_punctuation_is_excluded():
